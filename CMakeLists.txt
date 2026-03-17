@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
+if(MSVC)
+    set(CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION "10.0.22621.0" CACHE STRING "" FORCE)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 
 #! ! ! ! ! ! !
@@ -18,16 +22,27 @@ else()
 endif()
 
 
+# Ensure raylib is built as static libraries
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build Raylib as static libraries" FORCE)
+
 
 project(mygame)
 
+#add raylib, and here you would add other libraries if needed!
+add_subdirectory(thirdparty/raylib-5.0)
+add_subdirectory(thirdparty/imgui-docking)
+add_subdirectory(thirdparty/rlImgui)
 
 
 # MY_SOURCES is defined to be a list of all the source files for my game 
 # DON'T ADD THE SOURCES BY HAND, they are already added with this macro
-file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS
+"${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
+"${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
+)
 
-add_executable("${CMAKE_PROJECT_NAME}")
+
+add_executable("${CMAKE_PROJECT_NAME}" ${MY_SOURCES})
 
 set_property(TARGET "${CMAKE_PROJECT_NAME}" PROPERTY CXX_STANDARD 17)
 
@@ -74,8 +89,12 @@ elseif(APPLE OR UNIX) # macOS / Linux
 endif()
 
 
-target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/")
+target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/gameLayer")
+target_include_directories("${CMAKE_PROJECT_NAME}" PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/src/platform")
 
 
+
+# Link raylib library statically, Here wou would add other libraries!
+target_link_libraries("${CMAKE_PROJECT_NAME}" PRIVATE raylib_static imgui rlimgui )
 
 
